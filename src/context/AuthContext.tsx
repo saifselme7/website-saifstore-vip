@@ -1,9 +1,10 @@
 import { createContext, useContext, useEffect, useState, type ReactNode } from 'react'
+import type { User } from '@supabase/supabase-js'
 import { supabase } from '@/lib/supabase'
 import type { Profile } from '@/types'
 
 interface AuthContextType {
-  user: any | null
+  user: User | null
   profile: Profile | null
   isAdmin: boolean
   loading: boolean
@@ -16,7 +17,7 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | undefined>(undefined)
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [user, setUser] = useState<any | null>(null)
+  const [user, setUser] = useState<User | null>(null)
   const [profile, setProfile] = useState<Profile | null>(null)
   const [loading, setLoading] = useState(true)
 
@@ -38,7 +39,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   async function fetchProfile(userId: string) {
     const { data } = await supabase.from('profiles').select('*').eq('id', userId).single()
-    setProfile(data as Profile)
+    setProfile(data ?? null)
     setLoading(false)
   }
 
@@ -67,8 +68,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   async function updateProfile(data: Partial<Profile>) {
     if (!user) return { error: new Error('Not authenticated') }
-    const { error } = await supabase.from('profiles').update(data).eq('id', user.id)
-    if (!error) setProfile(prev => prev ? { ...prev, ...data } : null)
+    const { id: _id, created_at: _created, updated_at: _updated, ...updatable } = data
+    const { error } = await supabase.from('profiles').update(updatable).eq('id', user.id)
+    if (!error) setProfile(prev => prev ? { ...prev, ...updatable } : null)
     return { error }
   }
 

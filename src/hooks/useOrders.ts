@@ -10,16 +10,16 @@ export function useOrders() {
 
   useEffect(() => {
     if (!user) { setLoading(false); return }
-    async function fetch() {
+    async function fetch(userId: string) {
       const { data } = await supabase
         .from('orders')
         .select('*, order_items(*)')
-        .eq('user_id', user.id)
+        .eq('user_id', userId)
         .order('created_at', { ascending: false })
       setOrders((data || []) as Order[])
       setLoading(false)
     }
-    fetch()
+    fetch(user.id)
   }, [user])
 
   return { orders, loading }
@@ -32,7 +32,7 @@ export function useAllOrders() {
   async function fetchOrders() {
     const { data } = await supabase
       .from('orders')
-      .select('*, order_items(*), profiles(full_name, email)')
+      .select('*, order_items(*)')
       .order('created_at', { ascending: false })
     setOrders((data || []) as Order[])
     setLoading(false)

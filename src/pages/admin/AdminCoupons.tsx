@@ -1,21 +1,32 @@
 import { useState } from 'react'
 import { useAdminCoupons } from '@/hooks/useAdmin'
 import { useApp } from '@/context/AppContext'
+import type { Coupon } from '@/types'
 import { Plus, Pencil, Trash2 } from 'lucide-react'
 import Loading from '@/components/Loading'
+
+interface CouponForm {
+  code: string
+  type: Coupon['type']
+  value: number
+  min_order_value: string | number
+  max_uses: string | number
+  expires_at: string
+  is_active: boolean
+}
 
 export default function AdminCoupons() {
   const { coupons, loading, create, update, remove } = useAdminCoupons()
   const { addToast } = useApp()
-  const [editing, setEditing] = useState<any>(undefined)
-  const [form, setForm] = useState({ code: '', type: 'percentage', value: 0, min_order_value: '', max_uses: '', expires_at: '', is_active: true })
+  const [editing, setEditing] = useState<Coupon | null | undefined>(undefined)
+  const [form, setForm] = useState<CouponForm>({ code: '', type: 'percentage', value: 0, min_order_value: '', max_uses: '', expires_at: '', is_active: true })
 
   function openCreate() {
     setEditing(null)
     setForm({ code: '', type: 'percentage', value: 0, min_order_value: '', max_uses: '', expires_at: '', is_active: true })
   }
 
-  function openEdit(c: any) {
+  function openEdit(c: Coupon) {
     setEditing(c)
     setForm({ code: c.code, type: c.type, value: c.value, min_order_value: c.min_order_value || '', max_uses: c.max_uses || '', expires_at: c.expires_at ? c.expires_at.split('T')[0] : '', is_active: c.is_active })
   }
@@ -83,7 +94,7 @@ export default function AdminCoupons() {
             <h2 className="text-xl font-bold text-saif-text mb-4">{editing ? 'Edit' : 'New'} Coupon</h2>
             <div className="space-y-3">
               <input value={form.code} onChange={e => setForm({...form, code: e.target.value})} placeholder="Code" className="input" />
-              <select value={form.type} onChange={e => setForm({...form, type: e.target.value})} className="input">
+              <select value={form.type} onChange={e => setForm({...form, type: e.target.value as Coupon['type']})} className="input">
                 <option value="percentage">Percentage</option>
                 <option value="fixed">Fixed</option>
               </select>

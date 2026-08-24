@@ -1,3 +1,22 @@
+/**
+ * Supabase database types for SAIF STORE.
+ *
+ * These types mirror supabase/schema.sql (including CHECK constraints, which
+ * are expressed as literal unions) so that the typed Supabase client
+ * (`createClient<Database>`) can correctly infer Row/Insert/Update shapes.
+ *
+ * Each table declares a `Relationships` array describing its foreign keys.
+ * This is required by the `GenericSchema` / `GenericTable` constraints of
+ * `@supabase/postgrest-js` (bundled in `@supabase/supabase-js` v2): without
+ * it the client falls back to `never` types for all queries. The parser also
+ * uses these relationships to type-check embedded resources
+ * (e.g. `products.select('*, categories(*)')`).
+ *
+ * Foreign keys that reference tables outside the `public` schema
+ * (e.g. `*.user_id -> auth.users`) are intentionally omitted, matching the
+ * output of `supabase gen types`.
+ */
+
 export interface Database {
   public: {
     Tables: {
@@ -30,6 +49,7 @@ export interface Database {
           role?: 'customer' | 'admin'
           updated_at?: string
         }
+        Relationships: []
       }
       categories: {
         Row: {
@@ -60,6 +80,7 @@ export interface Database {
           sort_order?: number
           is_active?: boolean
         }
+        Relationships: []
       }
       products: {
         Row: {
@@ -126,6 +147,15 @@ export interface Database {
           metadata?: Record<string, any>
           updated_at?: string
         }
+        Relationships: [
+          {
+            foreignKeyName: 'products_category_id_fkey'
+            columns: ['category_id']
+            isOneToOne: false
+            referencedRelation: 'categories'
+            referencedColumns: ['id']
+          }
+        ]
       }
       product_variants: {
         Row: {
@@ -161,6 +191,15 @@ export interface Database {
           color?: string | null
           image?: string | null
         }
+        Relationships: [
+          {
+            foreignKeyName: 'product_variants_product_id_fkey'
+            columns: ['product_id']
+            isOneToOne: false
+            referencedRelation: 'products'
+            referencedColumns: ['id']
+          }
+        ]
       }
       wishlists: {
         Row: {
@@ -176,6 +215,15 @@ export interface Database {
           created_at?: string
         }
         Update: {}
+        Relationships: [
+          {
+            foreignKeyName: 'wishlists_product_id_fkey'
+            columns: ['product_id']
+            isOneToOne: false
+            referencedRelation: 'products'
+            referencedColumns: ['id']
+          }
+        ]
       }
       carts: {
         Row: {
@@ -197,6 +245,7 @@ export interface Database {
           session_id?: string | null
           updated_at?: string
         }
+        Relationships: []
       }
       cart_items: {
         Row: {
@@ -222,13 +271,45 @@ export interface Database {
           variant_id?: string | null
           updated_at?: string
         }
+        Relationships: [
+          {
+            foreignKeyName: 'cart_items_cart_id_fkey'
+            columns: ['cart_id']
+            isOneToOne: false
+            referencedRelation: 'carts'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'cart_items_product_id_fkey'
+            columns: ['product_id']
+            isOneToOne: false
+            referencedRelation: 'products'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'cart_items_variant_id_fkey'
+            columns: ['variant_id']
+            isOneToOne: false
+            referencedRelation: 'product_variants'
+            referencedColumns: ['id']
+          }
+        ]
       }
       orders: {
         Row: {
           id: string
           order_number: string
           user_id: string
-          status: string
+          status:
+            | 'pending'
+            | 'confirmed'
+            | 'processing'
+            | 'ready'
+            | 'shipped'
+            | 'delivered'
+            | 'completed'
+            | 'cancelled'
+            | 'rejected'
           subtotal: number
           discount: number
           total: number
@@ -245,7 +326,16 @@ export interface Database {
           id?: string
           order_number: string
           user_id: string
-          status?: string
+          status?:
+            | 'pending'
+            | 'confirmed'
+            | 'processing'
+            | 'ready'
+            | 'shipped'
+            | 'delivered'
+            | 'completed'
+            | 'cancelled'
+            | 'rejected'
           subtotal?: number
           discount?: number
           total?: number
@@ -259,7 +349,16 @@ export interface Database {
           updated_at?: string
         }
         Update: {
-          status?: string
+          status?:
+            | 'pending'
+            | 'confirmed'
+            | 'processing'
+            | 'ready'
+            | 'shipped'
+            | 'delivered'
+            | 'completed'
+            | 'cancelled'
+            | 'rejected'
           subtotal?: number
           discount?: number
           total?: number
@@ -271,6 +370,7 @@ export interface Database {
           notes?: string | null
           updated_at?: string
         }
+        Relationships: []
       }
       order_items: {
         Row: {
@@ -298,12 +398,35 @@ export interface Database {
           created_at?: string
         }
         Update: {}
+        Relationships: [
+          {
+            foreignKeyName: 'order_items_order_id_fkey'
+            columns: ['order_id']
+            isOneToOne: false
+            referencedRelation: 'orders'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'order_items_product_id_fkey'
+            columns: ['product_id']
+            isOneToOne: false
+            referencedRelation: 'products'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'order_items_variant_id_fkey'
+            columns: ['variant_id']
+            isOneToOne: false
+            referencedRelation: 'product_variants'
+            referencedColumns: ['id']
+          }
+        ]
       }
       coupons: {
         Row: {
           id: string
           code: string
-          type: string
+          type: 'percentage' | 'fixed'
           value: number
           min_order_value: number | null
           max_uses: number | null
@@ -315,7 +438,7 @@ export interface Database {
         Insert: {
           id?: string
           code: string
-          type: string
+          type: 'percentage' | 'fixed'
           value: number
           min_order_value?: number | null
           max_uses?: number | null
@@ -326,7 +449,7 @@ export interface Database {
         }
         Update: {
           code?: string
-          type?: string
+          type?: 'percentage' | 'fixed'
           value?: number
           min_order_value?: number | null
           max_uses?: number | null
@@ -334,6 +457,7 @@ export interface Database {
           expires_at?: string | null
           is_active?: boolean
         }
+        Relationships: []
       }
       reviews: {
         Row: {
@@ -343,7 +467,7 @@ export interface Database {
           rating: number
           title: string
           body: string
-          status: string
+          status: 'pending' | 'approved' | 'rejected'
           created_at: string
         }
         Insert: {
@@ -353,15 +477,24 @@ export interface Database {
           rating: number
           title: string
           body: string
-          status?: string
+          status?: 'pending' | 'approved' | 'rejected'
           created_at?: string
         }
         Update: {
           rating?: number
           title?: string
           body?: string
-          status?: string
+          status?: 'pending' | 'approved' | 'rejected'
         }
+        Relationships: [
+          {
+            foreignKeyName: 'reviews_product_id_fkey'
+            columns: ['product_id']
+            isOneToOne: false
+            referencedRelation: 'products'
+            referencedColumns: ['id']
+          }
+        ]
       }
       site_settings: {
         Row: {
@@ -425,6 +558,7 @@ export interface Database {
           footer_text?: string | null
           updated_at?: string
         }
+        Relationships: []
       }
     }
     Views: {}
