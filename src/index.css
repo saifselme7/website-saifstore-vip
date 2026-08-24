@@ -1,0 +1,126 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --bg: #000000;
+    --text: #F5F0E8;
+    --text-dim: #9C9C9C;
+    --accent: #E63946;
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    font-family: 'Inter', system-ui, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    overflow-x: hidden;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  ::selection {
+    background: var(--accent);
+    color: var(--bg);
+  }
+
+  ::-webkit-scrollbar {
+    width: 6px;
+  }
+  ::-webkit-scrollbar-track {
+    background: #111;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: #333;
+    border-radius: 3px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: #555;
+  }
+}
+
+@layer components {
+  .btn {
+    @apply inline-flex items-center justify-center px-8 py-3.5 text-xs font-semibold uppercase tracking-wider border border-saif-text bg-transparent text-saif-text cursor-pointer transition-all duration-300 ease-saif hover:bg-saif-text hover:text-black;
+  }
+
+  .btn-primary {
+    @apply bg-saif-text text-black hover:bg-saif-accent hover:border-saif-accent hover:text-white;
+  }
+
+  .btn-sm {
+    @apply px-4 py-2 text-[10px];
+  }
+
+  .btn-danger {
+    @apply border-saif-accent text-saif-accent hover:bg-saif-accent hover:text-white;
+  }
+
+  .input {
+    @apply w-full bg-transparent border border-saif-border text-saif-text text-sm px-4 py-3 focus:outline-none focus:border-saif-text placeholder:text-saif-dim/40;
+  }
+
+  .label {
+    @apply text-xs font-semibold uppercase tracking-wider text-saif-dim mb-2 block;
+  }
+}
+
+@layer utilities {
+  .animate-pageIn {
+    animation: pageIn 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  }
+
+  .animate-fadeUp {
+    animation: fadeUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  }
+
+  .animate-toastIn {
+    animation: toastIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  }
+}
+
+@keyframes pageIn {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(40px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes toastIn {
+  from { opacity: 0; transform: translateX(40px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes toastOut {
+  from { opacity: 1; transform: translateX(0); }
+  to { opacity: 0; transform: translateX(40px); }
+}
+
+@keyframes skeleton {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+.reveal {
+  opacity: 0;
+  transform: translateY(40px);
+  transition: opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1), transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.reveal.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.skeleton {
+  background: linear-gradient(90deg, #111 25%, #1a1a1a 50%, #111 75%);
+  background-size: 200% 100%;
+  animation: skeleton 1.5s infinite;
+}
