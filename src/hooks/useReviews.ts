@@ -10,7 +10,7 @@ export function useReviews(productId?: string) {
     async function fetch() {
       let query = supabase
         .from('reviews')
-        .select('*, profiles(full_name, avatar_url)')
+        .select('*')
         .eq('status', 'approved')
       if (productId) query = query.eq('product_id', productId)
       const { data } = await query.order('created_at', { ascending: false })

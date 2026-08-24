@@ -4,6 +4,7 @@ import { useApp } from '@/context/AppContext'
 import { supabase } from '@/lib/supabase'
 import { formatPrice } from '@/lib/utils'
 import { ORDER_STATUS_LABELS, ORDER_STATUS_COLORS } from '@/lib/constants'
+import type { OrderStatus } from '@/types'
 import Loading from '@/components/Loading'
 
 export default function AdminOrders() {
@@ -11,7 +12,7 @@ export default function AdminOrders() {
   const { addToast } = useApp()
   const [filter, setFilter] = useState('')
 
-  async function updateStatus(orderId: string, status: string) {
+  async function updateStatus(orderId: string, status: OrderStatus) {
     const { error } = await supabase.from('orders').update({ status }).eq('id', orderId)
     if (error) addToast('Failed to update status', 'error')
     else { addToast('Status updated'); refetch() }
@@ -51,7 +52,7 @@ export default function AdminOrders() {
                   <td className="p-4">
                     <select
                       value={order.status}
-                      onChange={e => updateStatus(order.id, e.target.value)}
+                      onChange={e => updateStatus(order.id, e.target.value as OrderStatus)}
                       className={`bg-transparent text-xs uppercase border px-2 py-1 ${ORDER_STATUS_COLORS[order.status] || 'text-saif-dim'} border-current`}
                     >
                       {Object.keys(ORDER_STATUS_LABELS).map(s => (

@@ -22,7 +22,7 @@ export default function OrderConfirmationPage() {
         .select('*, order_items(*)')
         .eq('id', id)
         .single()
-      setOrder(data as Order)
+      setOrder(data ?? null)
       setLoading(false)
     }
     fetch()

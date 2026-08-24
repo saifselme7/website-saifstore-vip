@@ -1,6 +1,15 @@
 import { useEffect, useState, useCallback } from 'react'
 import { supabase } from '@/lib/supabase'
+import type { Database } from '@/lib/database.types'
 import type { Product, Order, Category, Coupon, Review, Profile } from '@/types'
+
+type ProductInsert = Database['public']['Tables']['products']['Insert']
+type ProductUpdate = Database['public']['Tables']['products']['Update']
+type CategoryInsert = Database['public']['Tables']['categories']['Insert']
+type CategoryUpdate = Database['public']['Tables']['categories']['Update']
+type CouponInsert = Database['public']['Tables']['coupons']['Insert']
+type CouponUpdate = Database['public']['Tables']['coupons']['Update']
+type ReviewStatus = Database['public']['Tables']['reviews']['Row']['status']
 
 export function useAdminStats() {
   const [stats, setStats] = useState({
@@ -46,7 +55,7 @@ export function useAdminProducts() {
   const fetch = useCallback(async () => {
     const { data } = await supabase
       .from('products')
-      .select('*, categories(name), product_variants(*)')
+      .select('*, categories(*), product_variants(*)')
       .order('created_at', { ascending: false })
     setProducts((data || []) as Product[])
     setLoading(false)
@@ -54,13 +63,13 @@ export function useAdminProducts() {
 
   useEffect(() => { fetch() }, [fetch])
 
-  const create = async (product: Partial<Product>) => {
+  const create = async (product: ProductInsert) => {
     const { data, error } = await supabase.from('products').insert(product).select().single()
     if (!error) fetch()
     return { data, error }
   }
 
-  const update = async (id: string, product: Partial<Product>) => {
+  const update = async (id: string, product: ProductUpdate) => {
     const { error } = await supabase.from('products').update(product).eq('id', id)
     if (!error) fetch()
     return { error }
@@ -87,13 +96,13 @@ export function useAdminCategories() {
 
   useEffect(() => { fetch() }, [fetch])
 
-  const create = async (cat: Partial<Category>) => {
+  const create = async (cat: CategoryInsert) => {
     const { error } = await supabase.from('categories').insert(cat)
     if (!error) fetch()
     return { error }
   }
 
-  const update = async (id: string, cat: Partial<Category>) => {
+  const update = async (id: string, cat: CategoryUpdate) => {
     const { error } = await supabase.from('categories').update(cat).eq('id', id)
     if (!error) fetch()
     return { error }
@@ -120,13 +129,13 @@ export function useAdminCoupons() {
 
   useEffect(() => { fetch() }, [fetch])
 
-  const create = async (coupon: Partial<Coupon>) => {
+  const create = async (coupon: CouponInsert) => {
     const { error } = await supabase.from('coupons').insert(coupon)
     if (!error) fetch()
     return { error }
   }
 
-  const update = async (id: string, coupon: Partial<Coupon>) => {
+  const update = async (id: string, coupon: CouponUpdate) => {
     const { error } = await supabase.from('coupons').update(coupon).eq('id', id)
     if (!error) fetch()
     return { error }
@@ -148,7 +157,7 @@ export function useAdminReviews() {
   const fetch = useCallback(async () => {
     const { data } = await supabase
       .from('reviews')
-      .select('*, profiles(full_name), products(name)')
+      .select('*, products(name)')
       .order('created_at', { ascending: false })
     setReviews((data || []) as Review[])
     setLoading(false)
@@ -156,7 +165,7 @@ export function useAdminReviews() {
 
   useEffect(() => { fetch() }, [fetch])
 
-  const updateStatus = async (id: string, status: string) => {
+  const updateStatus = async (id: string, status: ReviewStatus) => {
     const { error } = await supabase.from('reviews').update({ status }).eq('id', id)
     if (!error) fetch()
     return { error }

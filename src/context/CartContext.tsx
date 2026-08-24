@@ -48,15 +48,15 @@ export function CartProvider({ children }: { children: ReactNode }) {
   // Sync with Supabase when user logs in
   useEffect(() => {
     if (!user) return
-    syncCartToUser()
+    syncCartToUser(user.id)
   }, [user])
 
-  async function syncCartToUser() {
+  async function syncCartToUser(userId: string) {
     const sessionId = getSessionId()
     const { data: existing } = await supabase
       .from('carts')
       .select('id, cart_items(*)')
-      .eq('user_id', user.id)
+      .eq('user_id', userId)
       .single()
 
     if (existing) {

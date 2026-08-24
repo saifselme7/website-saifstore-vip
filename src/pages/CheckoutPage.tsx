@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { supabase } from '@/lib/supabase'
+import type { Database } from '@/lib/database.types'
 import { useAuth } from '@/context/AuthContext'
 import { useCart } from '@/context/CartContext'
 import { useApp } from '@/context/AppContext'
@@ -39,7 +40,7 @@ export default function CheckoutPage() {
     setSubmitting(true)
 
     const orderNumber = generateOrderNumber()
-    const orderData = {
+    const orderData: Database['public']['Tables']['orders']['Insert'] = {
       order_number: orderNumber,
       user_id: user.id,
       status: 'pending',

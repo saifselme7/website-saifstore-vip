@@ -8,7 +8,7 @@ export default function AdminSettings() {
   const { addToast } = useApp()
   const [settings, setSettings] = useState<SiteSettings | null>(null)
   const [loading, setLoading] = useState(true)
-  const [form, setForm] = useState<any>({})
+  const [form, setForm] = useState<Partial<Omit<SiteSettings, 'id' | 'created_at' | 'updated_at'>>>({})
 
   useEffect(() => {
     async function fetch() {
